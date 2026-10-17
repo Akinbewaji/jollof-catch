@@ -12,6 +12,7 @@
     --yellow: #ffc21a;
     --yellow-glow: rgba(255, 194, 26, 0.35);
     --red: #e63946;
+    --red-glow: rgba(230, 57, 70, 0.45);
     --leaf: #2a9d8f;
     --orange: #f77f00;
     --paper: #fff7e0;
@@ -34,12 +35,16 @@
   canvas {
     width: 100%; height: 100%; display: block;
     background: linear-gradient(180deg, #18284e 0%, #0d1730 75%, #080f21 100%);
+    transition: filter .3s ease;
+  }
+  #stage.wahala canvas {
+    box-shadow: inset 0 0 40px rgba(230,57,70,0.4);
   }
 
   /* Overlay Base */
   .overlay {
     position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
-    gap: 12px; padding: 22px; text-align: center; background: var(--ink-glass);
+    gap: 12px; padding: 20px; text-align: center; background: var(--ink-glass);
     backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
     transition: opacity .2s ease, transform .2s ease; z-index: 20;
   }
@@ -52,8 +57,8 @@
   }
   .top-bar > * { pointer-events: auto; }
   .btn-icon {
-    width: 40px; height: 40px; border-radius: 50%; border: 1px solid rgba(255,247,224,0.2);
-    background: rgba(14, 24, 50, 0.75); color: var(--paper); font-size: 18px;
+    width: 38px; height: 38px; border-radius: 50%; border: 1px solid rgba(255,247,224,0.2);
+    background: rgba(14, 24, 50, 0.75); color: var(--paper); font-size: 17px;
     display: inline-flex; align-items: center; justify-content: center; cursor: pointer;
     backdrop-filter: blur(6px); transition: transform .15s ease, background .15s ease, border-color .15s ease;
   }
@@ -63,15 +68,15 @@
 
   /* Typography */
   h1 {
-    margin: 0; font-size: clamp(32px, 8.5vw, 52px); color: var(--yellow);
+    margin: 0; font-size: clamp(30px, 8vw, 48px); color: var(--yellow);
     letter-spacing: -1px; line-height: 1.05; text-shadow: 0 4px 16px var(--yellow-glow);
   }
-  h2 { margin: 0; font-size: 22px; color: var(--yellow); }
-  p { margin: 0; max-width: 32ch; line-height: 1.45; font-size: 14px; color: var(--muted); }
+  h2 { margin: 0; font-size: 21px; color: var(--yellow); }
+  p { margin: 0; max-width: 32ch; line-height: 1.4; font-size: 13.5px; color: var(--muted); }
 
   /* Buttons */
   button, a.btn {
-    border: 0; border-radius: 999px; padding: 12px 28px; font: inherit; font-size: 15px; font-weight: 700;
+    border: 0; border-radius: 999px; padding: 11px 26px; font: inherit; font-size: 14.5px; font-weight: 700;
     cursor: pointer; background: var(--yellow); color: #0b1329; text-decoration: none;
     box-shadow: 0 4px 16px var(--yellow-glow); transition: transform .15s ease, box-shadow .15s ease, filter .15s ease;
     display: inline-flex; align-items: center; justify-content: center; gap: 8px;
@@ -79,66 +84,96 @@
   button:hover, a.btn:hover { transform: translateY(-2px); filter: brightness(1.08); box-shadow: 0 6px 20px var(--yellow-glow); }
   button:active, a.btn:active { transform: translateY(1px); }
   button.alt, a.btn.alt {
-    background: transparent; color: var(--paper); border: 2px solid rgba(255,247,224,0.4);
-    box-shadow: none; padding: 9px 20px; font-size: 14px;
+    background: transparent; color: var(--paper); border: 2px solid rgba(255,247,224,0.35);
+    box-shadow: none; padding: 8px 18px; font-size: 13.5px;
   }
   button.alt:hover, a.btn.alt:hover { border-color: var(--yellow); color: var(--yellow); }
-  button.danger { background: var(--red); color: #fff; box-shadow: 0 4px 14px rgba(230,57,70,0.4); }
+  button.wahala-btn {
+    background: linear-gradient(135deg, #e63946, #d90429); color: #fff;
+    box-shadow: 0 4px 16px var(--red-glow);
+  }
+  button.wahala-btn:hover { box-shadow: 0 6px 22px var(--red-glow); }
 
   /* Card */
   .card {
-    display: flex; align-items: center; gap: 10px; padding: 6px 16px 6px 6px;
+    display: flex; align-items: center; gap: 10px; padding: 5px 14px 5px 5px;
     border-radius: 999px; background: rgba(11,19,41,0.85); border: 1px solid rgba(255,247,224,0.12);
   }
-  .card img { width: 44px; height: 44px; border-radius: 50%; background: var(--yellow); object-fit: cover; }
-  .card b { display: block; text-align: left; font-size: 15px; color: var(--paper); }
-  .card span { font-size: 12px; color: var(--muted); display: block; text-align: left; }
+  .card img { width: 42px; height: 42px; border-radius: 50%; background: var(--yellow); object-fit: cover; }
+  .card b { display: block; text-align: left; font-size: 14.5px; color: var(--paper); }
+  .card span { font-size: 11.5px; color: var(--muted); display: block; text-align: left; }
+
+  /* Mode Switcher Banner */
+  .mode-badge-wrap {
+    display: inline-flex; background: rgba(11,19,41,0.85); border: 1px solid rgba(255,247,224,0.15);
+    border-radius: 999px; padding: 3px; gap: 4px; margin: 4px 0;
+  }
+  .mode-chip {
+    border: 0; background: transparent; color: var(--muted); border-radius: 999px;
+    padding: 5px 14px; font-size: 12px; font-weight: 700; cursor: pointer; box-shadow: none;
+  }
+  .mode-chip.active { background: var(--yellow); color: #0b1329; }
+  .mode-chip.active.wahala { background: var(--red); color: #fff; }
 
   /* Leaderboard */
-  ol { margin: 0; padding: 0; list-style: none; width: min(320px, 100%); text-align: left; font-size: 13.5px; }
+  ol { margin: 0; padding: 0; list-style: none; width: min(320px, 100%); text-align: left; font-size: 13px; }
   ol li {
-    display: flex; justify-content: space-between; gap: 8px; padding: 4px 0;
+    display: flex; justify-content: space-between; gap: 8px; padding: 3.5px 0;
     border-bottom: 1px solid rgba(255,246,220,0.1);
   }
   ol li.me { color: var(--yellow); font-weight: 700; }
-  #msg { min-height: 1.4em; color: var(--yellow); font-size: 13.5px; font-weight: 600; }
+  #msg { min-height: 1.4em; color: var(--yellow); font-size: 13px; font-weight: 600; }
 
-  /* Modal Panels */
+  /* Roast Box on Game Over */
+  .roast-card {
+    background: rgba(230, 57, 70, 0.12); border: 1px solid rgba(230, 57, 70, 0.35);
+    border-radius: 12px; padding: 10px 14px; width: min(340px, 100%); text-align: center;
+    position: relative; margin: 2px 0;
+  }
+  .roast-tag {
+    font-size: 10.5px; text-transform: uppercase; letter-spacing: 1px;
+    color: #ff758f; font-weight: 800; margin-bottom: 3px; display: block;
+  }
+  .roast-text {
+    font-size: 13.5px; font-style: italic; color: #fff; line-height: 1.35;
+  }
+
+  /* Modals */
   .modal-panel {
     background: #101c38; border: 1px solid rgba(255,194,26,0.3); border-radius: 16px;
-    padding: 20px; max-width: 380px; width: 92%; max-height: 85vh; overflow-y: auto;
+    padding: 18px; max-width: 380px; width: 92%; max-height: 85vh; overflow-y: auto;
     text-align: left; box-shadow: 0 20px 40px rgba(0,0,0,0.7); position: relative;
-    display: flex; flex-direction: column; gap: 14px;
+    display: flex; flex-direction: column; gap: 12px;
   }
   .modal-panel::-webkit-scrollbar { width: 6px; }
   .modal-panel::-webkit-scrollbar-thumb { background: rgba(255,247,224,0.2); border-radius: 999px; }
-  .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; }
+  .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px; }
   .modal-close {
-    background: transparent; border: 0; color: var(--muted); font-size: 22px; cursor: pointer;
+    background: transparent; border: 0; color: var(--muted); font-size: 20px; cursor: pointer;
     padding: 0 4px; box-shadow: none; border-radius: 6px;
   }
   .modal-close:hover { color: var(--yellow); transform: none; filter: none; }
 
-  /* Instructions Items */
-  .food-guide { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  /* Food Guide */
+  .food-guide { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
   .food-item {
-    display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.04);
-    padding: 8px 10px; border-radius: 10px; font-size: 12.5px; border: 1px solid rgba(255,255,255,0.05);
+    display: flex; align-items: center; gap: 7px; background: rgba(255,255,255,0.04);
+    padding: 7px 9px; border-radius: 10px; font-size: 12px; border: 1px solid rgba(255,255,255,0.05);
   }
-  .food-item span.emoji { font-size: 24px; line-height: 1; }
+  .food-item span.emoji { font-size: 22px; line-height: 1; }
   .food-item b { display: block; color: var(--paper); }
   .food-item small { color: var(--muted); display: block; }
 
   /* Settings Controls */
   .setting-row {
     display: flex; justify-content: space-between; align-items: center;
-    padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.07);
+    padding: 9px 0; border-bottom: 1px solid rgba(255,255,255,0.07);
   }
   .setting-row:last-child { border-bottom: 0; }
-  .setting-info b { display: block; font-size: 14px; color: var(--paper); }
-  .setting-info small { color: var(--muted); font-size: 12px; }
+  .setting-info b { display: block; font-size: 13.5px; color: var(--paper); }
+  .setting-info small { color: var(--muted); font-size: 11.5px; }
 
-  /* Switch Toggle */
+  /* Switch */
   .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
   .switch input { opacity: 0; width: 0; height: 0; }
   .slider {
@@ -152,15 +187,15 @@
   input:checked + .slider { background: var(--yellow); }
   input:checked + .slider:before { transform: translateX(20px); background: #0b1329; }
 
-  /* Segmented Option Control */
+  /* Segmented */
   .segmented { display: flex; background: #0c162e; padding: 2px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.15); }
   .segmented button {
-    background: transparent; color: var(--muted); border-radius: 999px; padding: 5px 12px;
-    font-size: 12px; font-weight: 600; box-shadow: none; border: 0;
+    background: transparent; color: var(--muted); border-radius: 999px; padding: 5px 11px;
+    font-size: 11.5px; font-weight: 600; box-shadow: none; border: 0;
   }
   .segmented button.active { background: var(--yellow); color: #0b1329; font-weight: 700; }
 
-  /* HUD overlay during play */
+  /* HUD */
   #hud {
     position: absolute; top: 12px; left: 14px; right: 14px; display: none;
     justify-content: space-between; align-items: center; z-index: 10; pointer-events: none;
@@ -168,9 +203,19 @@
   #hud > * { pointer-events: auto; }
   .hud-pill {
     background: rgba(11, 19, 41, 0.78); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-    border: 1px solid rgba(255,247,224,0.15); padding: 5px 14px; border-radius: 999px;
-    font-weight: 700; font-size: 14px; display: flex; align-items: center; gap: 6px;
+    border: 1px solid rgba(255,247,224,0.15); padding: 5px 12px; border-radius: 999px;
+    font-weight: 700; font-size: 13.5px; display: flex; align-items: center; gap: 6px;
   }
+  .hud-pill.danger { border-color: var(--red); color: #ff8585; }
+
+  /* Toast Notification */
+  #toast {
+    position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(30px);
+    background: #ffc21a; color: #0b1329; padding: 8px 18px; border-radius: 999px;
+    font-size: 13px; font-weight: 800; box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    opacity: 0; pointer-events: none; transition: transform .25s ease, opacity .25s ease; z-index: 50;
+  }
+  #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
 </style>
 </head>
 <body>
@@ -179,10 +224,13 @@
     <!-- Active Canvas -->
     <canvas id="c" width="480" height="640" aria-label="Jollof Catch game"></canvas>
 
+    <!-- Floating Toast for Share & Alerts -->
+    <div id="toast">Copied to clipboard! 📋</div>
+
     <!-- Top In-Game HUD -->
     <div id="hud">
       <div class="hud-pill"><span id="hud-score">Plates: 0</span></div>
-      <div class="hud-pill"><span id="hud-lives">🔥🔥🔥</span></div>
+      <div class="hud-pill" id="hud-lives-pill"><span id="hud-lives">🔥🔥🔥</span></div>
       <div style="display:flex;gap:6px">
         <button class="btn-icon" id="btn-pause" aria-label="Pause" title="Pause (Esc)">⏸️</button>
       </div>
@@ -205,40 +253,54 @@
         </div>
       </div>
 
-      <div style="margin-top:40px">
+      <div style="margin-top:44px">
         <h1>Jollof Catch</h1>
-        <p>Catch the jollof, plantains & chicken. Grab chilled drinks to cool down. Dodge the scotch bonnets!</p>
+        <p>Catch the food, dodge the scotch bonnets & brace for drifting wedding winds!</p>
+      </div>
+
+      <!-- Mode Selector -->
+      <div class="mode-badge-wrap">
+        <button type="button" class="mode-chip active" id="chip-normal">🍗 Standard Party</button>
+        <button type="button" class="mode-chip" id="chip-wahala">🌶️ Wahala Mode</button>
       </div>
 
       <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:6px 0">
-        <button id="play">▶ Play</button>
+        <button id="play">▶ Play Now</button>
         <a class="btn alt" id="signin" href="#" hidden>Sign in</a>
       </div>
 
       <div style="width:min(320px,100%);text-align:left">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
-          <b style="font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Top Catches</b>
+          <b style="font-size:12.5px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Top Catches</b>
           <small style="color:var(--muted)">start.ng</small>
         </div>
         <ol id="board" aria-label="Leaderboard"></ol>
       </div>
     </div>
 
-    <!-- Game Over Overlay -->
+    <!-- Game Over Overlay with Roast & Share -->
     <div class="overlay" id="over" hidden>
-      <div style="font-size:48px">🔥</div>
+      <div style="font-size:42px" id="over-emoji">🔥</div>
       <h1 id="final">0</h1>
-      <p id="detail" style="font-size:16px;color:var(--paper)"></p>
+      <p id="detail" style="font-size:15px;color:var(--paper)"></p>
+
+      <!-- The Humorous Roast / Taunt Box -->
+      <div class="roast-card">
+        <span class="roast-tag">Party Gossip</span>
+        <div class="roast-text" id="roast-msg">"Aunty said: You came to wedding to pack jollof, but pepper pack you."</div>
+      </div>
+
       <p id="msg"></p>
 
-      <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:8px 0">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:6px 0">
         <button id="again">Play Again</button>
-        <a class="btn alt" id="signin2" href="#" hidden>Sign in to save scores</a>
+        <button class="alt" id="share-shame-btn">📸 Share Shame</button>
+        <a class="btn alt" id="signin2" href="#" hidden>Sign in</a>
       </div>
 
       <div style="width:min(320px,100%);text-align:left">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
-          <b style="font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Leaderboard</b>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px">
+          <b style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Leaderboard</b>
         </div>
         <ol id="board2" aria-label="Leaderboard"></ol>
       </div>
@@ -248,7 +310,7 @@
     <div class="overlay" id="pause-overlay" hidden>
       <h2>Game Paused</h2>
       <p>Take a breath! The kitchen awaits your return.</p>
-      <div style="display:flex;flex-direction:column;gap:10px;width:180px;margin-top:10px">
+      <div style="display:flex;flex-direction:column;gap:9px;width:180px;margin-top:10px">
         <button id="resume-btn">▶ Resume</button>
         <button class="alt" id="restart-btn">🔄 Restart</button>
         <button class="alt" id="pause-settings-btn">⚙️ Settings</button>
@@ -264,9 +326,9 @@
           <button class="modal-close" id="close-instructions" aria-label="Close">✕</button>
         </div>
 
-        <p style="color:var(--paper)">Slide left and right to catch delicious party dishes while avoiding mouth-burning peppers!</p>
+        <p style="color:var(--paper)">Slide left and right to catch party delicacies, grab the rare Golden Pot, and dodge spicy scotch bonnets!</p>
 
-        <b style="font-size:13px;color:var(--yellow);text-transform:uppercase;letter-spacing:.8px">What's Falling</b>
+        <b style="font-size:12px;color:var(--yellow);text-transform:uppercase;letter-spacing:.8px">Falling Menu</b>
         <div class="food-guide">
           <div class="food-item">
             <span class="emoji">🍛</span>
@@ -286,24 +348,28 @@
           </div>
         </div>
 
+        <!-- Special Items Guide -->
+        <div class="food-item" style="border-color:rgba(255,194,26,0.4);background:rgba(255,194,26,0.1)">
+          <span class="emoji">🍲</span>
+          <div><b style="color:var(--yellow)">"Too Good To Be True" Golden Pot</b><small>High Speed drop! +5 Instant Plates & Fanfare!</small></div>
+        </div>
+
         <div class="food-item" style="border-color:rgba(230,57,70,0.4);background:rgba(230,57,70,0.1)">
           <span class="emoji">🌶️</span>
           <div><b style="color:var(--red)">Scotch Bonnet (Ata Rodo)</b><small>DODGE! 1 Burn & resets streak. 3 Burns = Out!</small></div>
         </div>
 
-        <b style="font-size:13px;color:var(--yellow);text-transform:uppercase;letter-spacing:.8px">Controls</b>
-        <p style="font-size:13px">
-          • <b>Touch/Mouse:</b> Drag or slide finger/cursor horizontally.<br>
-          • <b>Keyboard:</b> Arrow keys or <kbd>A</kbd> / <kbd>D</kbd> keys.<br>
-          • <b>Pause:</b> Tap ⏸️ or press <kbd>Esc</kbd>.
+        <b style="font-size:12px;color:var(--yellow);text-transform:uppercase;letter-spacing:.8px">🌪️ Drifting Breeze (Wind Gusts)</b>
+        <p style="font-size:12.5px">
+          Watch out for party wind gusts! Food and peppers drift sideways mid-air. Check the wind arrow on your screen to anticipate the curve!
         </p>
 
-        <b style="font-size:13px;color:var(--yellow);text-transform:uppercase;letter-spacing:.8px">Your start.ng Character</b>
-        <p style="font-size:13px">
-          When signed in, your game character dynamically wears your unique start.ng style, skin, hairstyle, and hat. Your personal best streak and plates caught will be etched into the start.ng leaderboard!
+        <b style="font-size:12px;color:var(--yellow);text-transform:uppercase;letter-spacing:.8px">🌶️ Wahala (Spicy Nightmare) Mode</b>
+        <p style="font-size:12.5px">
+          Think you have fast hands? Wahala Mode gives you <b>1 single burn limit</b>, intense wind gusts, and blazing falling peppers. One touch and round is over!
         </p>
 
-        <button id="got-it-btn" style="width:100%;margin-top:6px">Got it, Let's Catch!</button>
+        <button id="got-it-btn" style="width:100%;margin-top:4px">Got it, Let's Catch!</button>
       </div>
     </div>
 
@@ -317,8 +383,19 @@
 
         <div class="setting-row">
           <div class="setting-info">
+            <b>Game Mode</b>
+            <small>Party or high-stakes Wahala</small>
+          </div>
+          <div class="segmented" id="set-mode-group">
+            <button type="button" class="active" data-val="normal">Standard</button>
+            <button type="button" data-val="wahala">Wahala 🔥</button>
+          </div>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-info">
             <b>Sound Effects</b>
-            <small>Retro sound bites & chimes</small>
+            <small>Procedural synth chimes & sizzles</small>
           </div>
           <label class="switch">
             <input type="checkbox" id="set-sound" checked>
@@ -359,7 +436,7 @@
           </div>
         </div>
 
-        <button id="save-settings-btn" style="width:100%;margin-top:8px">Done</button>
+        <button id="save-settings-btn" style="width:100%;margin-top:6px">Done</button>
       </div>
     </div>
 
@@ -368,14 +445,15 @@
 
 <script type="module">
 // ==========================================
-// 1. Settings & Audio Synthesizer
+// 1. Settings, Roasts & Synthesizer
 // ==========================================
-const SETTINGS_KEY = 'jollof_catch_settings_v1';
+const SETTINGS_KEY = 'jollof_catch_settings_v2';
 const defaultSettings = {
   sound: true,
   vibration: true,
   particles: true,
-  controlSpeed: 'smooth'
+  controlSpeed: 'smooth',
+  wahalaMode: false
 };
 
 let settings = { ...defaultSettings };
@@ -396,13 +474,37 @@ function updateSettingsUI() {
   $('btn-sound-toggle').textContent = settings.sound ? '🔊' : '🔇';
   $('btn-sound-toggle').title = settings.sound ? 'Sound is ON' : 'Sound is OFF';
 
-  const segButtons = document.querySelectorAll('#set-control-group button');
-  segButtons.forEach(b => {
+  // Mode chips
+  $('chip-normal').classList.toggle('active', !settings.wahalaMode);
+  $('chip-wahala').classList.toggle('active', settings.wahalaMode);
+  $('chip-wahala').classList.toggle('wahala', settings.wahalaMode);
+  $('stage').classList.toggle('wahala', settings.wahalaMode);
+
+  // Settings modal buttons
+  document.querySelectorAll('#set-mode-group button').forEach(b => {
+    b.classList.toggle('active', (b.dataset.val === 'wahala') === settings.wahalaMode);
+  });
+  document.querySelectorAll('#set-control-group button').forEach(b => {
     b.classList.toggle('active', b.dataset.val === settings.controlSpeed);
   });
 }
 
-// Web Audio API Synthesizer (Zero External Audio Files)
+// Nigerian Party / Owambe Roasts for Game Over
+const ROASTS = [
+  "Aunty said: You came to wedding to pack jollof, but pepper pack you.",
+  "Your ancestors did not cross the Niger for you to miss that plantain.",
+  "Even the caterer is shaking her head at your plate-catching skills.",
+  "Burned by Ata Rodo again? Go drink chilled water, my friend.",
+  "Party finished and you didn't even get take-away. Chai!",
+  "Security guard at the gate saw you drop that chicken and laughed.",
+  "You saw red pepper and thought it was tomato? Wahala be like bicycle.",
+  "Plate slip from your hand like soap in bathhouse. Shame!",
+  "Catering aunty just packed the remaining meat and hid it under the table."
+];
+
+let lastRoast = ROASTS[0];
+
+// Web Audio API Synthesizer (Zero External Dependencies)
 let audioCtx = null;
 function getAudioContext() {
   if (!audioCtx) {
@@ -422,20 +524,32 @@ function playSound(type) {
 
   const now = ctx.currentTime;
   if (type === 'catch') {
-    // Bright musical chime
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
     osc.type = 'triangle';
-    osc.frequency.setValueAtTime(523.25, now); // C5
-    osc.frequency.exponentialRampToValueAtTime(783.99, now + 0.12); // G5
+    osc.frequency.setValueAtTime(523.25, now);
+    osc.frequency.exponentialRampToValueAtTime(783.99, now + 0.12);
     gain.gain.setValueAtTime(0.18, now);
     gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
     osc.connect(gain);
     gain.connect(ctx.destination);
     osc.start(now);
     osc.stop(now + 0.15);
+  } else if (type === 'golden_pot') {
+    // Grand celebratory fanfare
+    [523.25, 659.25, 783.99, 1046.50, 1318.51].forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(freq, now + i * 0.04);
+      gain.gain.setValueAtTime(0.14, now + i * 0.04);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.04 + 0.22);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now + i * 0.04);
+      osc.stop(now + i * 0.04 + 0.22);
+    });
   } else if (type === 'heal') {
-    // Uplifting harmonic arpeggio
     [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
@@ -449,20 +563,18 @@ function playSound(type) {
       osc.stop(now + i * 0.05 + 0.2);
     });
   } else if (type === 'burn') {
-    // Sizzling low noise + buzzer
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
     osc.type = 'sawtooth';
     osc.frequency.setValueAtTime(220, now);
-    osc.frequency.linearRampToValueAtTime(90, now + 0.25);
+    osc.frequency.linearRampToValueAtTime(80, now + 0.28);
     gain.gain.setValueAtTime(0.25, now);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
     osc.connect(gain);
     gain.connect(ctx.destination);
     osc.start(now);
-    osc.stop(now + 0.25);
+    osc.stop(now + 0.28);
   } else if (type === 'streak') {
-    // High celebratory fanfare
     [659.25, 783.99, 987.77].forEach((f, i) => {
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
@@ -476,18 +588,17 @@ function playSound(type) {
       osc.stop(now + i * 0.06 + 0.25);
     });
   } else if (type === 'over') {
-    // Descending game-over tone
-    [392, 349.23, 311.13, 261.63].forEach((f, i) => {
+    [392, 349.23, 311.13, 261.63, 196].forEach((f, i) => {
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
       osc.type = 'sawtooth';
-      osc.frequency.setValueAtTime(f, now + i * 0.12);
-      gain.gain.setValueAtTime(0.2, now + i * 0.12);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.12 + 0.25);
+      osc.frequency.setValueAtTime(f, now + i * 0.1);
+      gain.gain.setValueAtTime(0.2, now + i * 0.1);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.1 + 0.28);
       osc.connect(gain);
       gain.connect(ctx.destination);
-      osc.start(now + i * 0.12);
-      osc.stop(now + i * 0.12 + 0.25);
+      osc.start(now + i * 0.1);
+      osc.stop(now + i * 0.1 + 0.28);
     });
   } else if (type === 'click') {
     const osc = ctx.createOscillator();
@@ -507,6 +618,13 @@ function triggerHaptic(duration = 20) {
   if (settings.vibration && 'vibrate' in navigator) {
     try { navigator.vibrate(duration); } catch {}
   }
+}
+
+function showToast(msg) {
+  const t = $('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2400);
 }
 
 // ==========================================
@@ -624,7 +742,7 @@ function drawCharacter(ctx, x, y, s, st, mood = 'normal') {
     ctx.fillRect(2, -38, 11, 38);
   }
 
-  // Backpack accessory
+  // Backpack
   if (st.accessory === 'backpack') {
     ctx.fillStyle = '#6b4f2a';
     ctx.fillRect(-24, -70, 10, 32);
@@ -634,13 +752,13 @@ function drawCharacter(ctx, x, y, s, st, mood = 'normal') {
   ctx.fillStyle = mood === 'burned' ? '#782013' : st.primaryColor;
   ctx.fillRect(-17, -72, 34, 36);
 
-  // Arms up in ready/catch posture
+  // Arms
   ctx.fillStyle = st.skinColor;
   const armOffset = mood === 'celebrating' ? -4 : 0;
   ctx.fillRect(-26, -78 + armOffset, 9, 34);
   ctx.fillRect(17, -78 + armOffset, 9, 34);
 
-  // Scarf accessory
+  // Scarf
   if (st.accessory === 'scarf') {
     ctx.fillStyle = '#f2b705';
     ctx.fillRect(-14, -76, 28, 7);
@@ -686,7 +804,6 @@ function drawCharacter(ctx, x, y, s, st, mood = 'normal') {
   // Facial Expression
   ctx.fillStyle = '#111';
   if (mood === 'burned') {
-    // Hurt / shocked face (X eyes)
     ctx.font = '10px sans-serif';
     ctx.fillText('✕', -8, -88);
     ctx.fillText('✕', 3, -88);
@@ -694,7 +811,6 @@ function drawCharacter(ctx, x, y, s, st, mood = 'normal') {
     ctx.arc(0, -81, 4, 0, Math.PI * 2);
     ctx.stroke();
   } else if (mood === 'celebrating') {
-    // Happy smile
     ctx.fillRect(-7, -90, 3, 3);
     ctx.fillRect(4, -90, 3, 3);
     ctx.beginPath();
@@ -702,13 +818,12 @@ function drawCharacter(ctx, x, y, s, st, mood = 'normal') {
     ctx.lineWidth = 2;
     ctx.stroke();
   } else {
-    // Normal neutral eyes & smile
     ctx.fillRect(-7, -90, 3, 3);
     ctx.fillRect(4, -90, 3, 3);
     ctx.fillRect(-4, -82, 8, 2);
   }
 
-  // Accessories on face
+  // Accessories
   if (st.accessory === 'glasses') {
     ctx.strokeStyle = '#111';
     ctx.lineWidth = 2;
@@ -773,6 +888,9 @@ let running = false, paused = false;
 let spawnT = 0, speed = 150, last = 0;
 let shakeTimer = 0, characterMood = 'normal', moodTimer = 0;
 
+// Wind & Drifting Breeze mechanics
+let windCurrent = 0, windTarget = 0, windTimer = 0;
+
 const GOOD_ITEMS = [
   { emoji: '🍛', name: 'Jollof' },
   { emoji: '🍌', name: 'Plantain' },
@@ -786,19 +904,28 @@ function reset() {
   score = 0;
   streak = 0;
   best = 0;
-  lives = 3;
+  lives = settings.wahalaMode ? 1 : 3;
   spawnT = 0;
-  speed = 150;
+  speed = settings.wahalaMode ? 190 : 150;
   px = targetX = W / 2;
   shakeTimer = 0;
   characterMood = 'normal';
   moodTimer = 0;
+  windCurrent = 0;
+  windTarget = 0;
+  windTimer = 0;
   updateHUD();
 }
 
 function updateHUD() {
   $('hud-score').textContent = `Plates: ${score}`;
-  $('hud-lives').textContent = lives > 0 ? '🔥'.repeat(lives) : '💀';
+  if (settings.wahalaMode) {
+    $('hud-lives').textContent = '💀 1 BURN OUT';
+    $('hud-lives-pill').classList.add('danger');
+  } else {
+    $('hud-lives').textContent = lives > 0 ? '🔥'.repeat(lives) : '💀';
+    $('hud-lives-pill').classList.remove('danger');
+  }
 }
 
 function spawnParticle(x, y, color, count = 6, speedMult = 1) {
@@ -874,7 +1001,20 @@ function frameLoop(t) {
   const lerpFactor = settings.controlSpeed === 'snappy' ? 24 : 14;
   px += (targetX - px) * Math.min(1, dt * lerpFactor);
 
-  speed = 150 + score * 3.2;
+  // Speed Scaling (Higher in Wahala Mode)
+  const speedStep = settings.wahalaMode ? 4.2 : 3.2;
+  const baseSpeed = settings.wahalaMode ? 190 : 150;
+  speed = baseSpeed + score * speedStep;
+
+  // Drifting Breeze / Wind Logic
+  windTimer -= dt;
+  if (windTimer <= 0) {
+    const windMax = settings.wahalaMode ? 140 : 80;
+    windTarget = (Math.random() - 0.5) * 2 * windMax;
+    windTimer = 2.5 + Math.random() * 3.0; // New gust every few seconds
+  }
+  windCurrent += (windTarget - windCurrent) * Math.min(1, dt * 1.5);
+
   spawnT -= dt;
 
   // Item Spawning
@@ -882,12 +1022,24 @@ function frameLoop(t) {
     const roll = Math.random();
     let type = 'food';
     let emoji = GOOD_ITEMS[Math.floor(Math.random() * GOOD_ITEMS.length)].emoji;
+    let vMult = 0.85 + Math.random() * 0.35;
+    let windSense = 0.8 + Math.random() * 0.5;
 
-    if (roll < 0.28) {
+    // Pepper chance: 42% in Wahala Mode, 28% in Standard Mode
+    const pepperThreshold = settings.wahalaMode ? 0.42 : 0.28;
+
+    if (roll < pepperThreshold) {
       type = 'pepper';
       emoji = '🌶️';
-    } else if (roll > 0.93) {
-      type = 'drink'; // Rare chilled zobo/malt
+      vMult = settings.wahalaMode ? 1.05 + Math.random() * 0.4 : 0.9 + Math.random() * 0.35;
+    } else if (roll > 0.96) {
+      // The "Too Good To Be True" Golden Pot (High speed drop!)
+      type = 'golden_pot';
+      emoji = '🍲';
+      vMult = 2.25; // 2.25x speed dash trap!
+      windSense = 0.3; // Heavy pot resists wind
+    } else if (roll > 0.91 && !settings.wahalaMode) {
+      type = 'drink'; // Chilled drink (Standard Mode only)
       emoji = '🥤';
     }
 
@@ -896,14 +1048,22 @@ function frameLoop(t) {
       y: -24,
       type,
       emoji,
-      v: speed * (0.85 + Math.random() * 0.35)
+      v: speed * vMult,
+      windSense
     });
 
-    spawnT = Math.max(0.32, 0.9 - score * 0.012);
+    const spawnDelay = settings.wahalaMode
+      ? Math.max(0.26, 0.75 - score * 0.015)
+      : Math.max(0.32, 0.9 - score * 0.012);
+    spawnT = spawnDelay;
   }
 
-  // Update item positions
-  for (const it of items) it.y += it.v * dt;
+  // Update item positions with vertical speed + horizontal wind drift
+  for (const it of items) {
+    it.y += it.v * dt;
+    it.x += windCurrent * it.windSense * dt;
+    it.x = Math.max(25, Math.min(W - 25, it.x)); // Keep inside canvas
+  }
 
   // Collision detection
   const feet = H - 30, catchY = feet - 92;
@@ -912,13 +1072,23 @@ function frameLoop(t) {
       if (it.type === 'pepper') {
         lives--;
         streak = 0;
-        shakeTimer = 0.25;
+        shakeTimer = settings.wahalaMode ? 0.45 : 0.25;
         characterMood = 'burned';
-        moodTimer = 0.5;
+        moodTimer = 0.55;
         playSound('burn');
-        triggerHaptic(50);
-        spawnParticle(it.x, it.y, '#e63946', 10, 1.3);
+        triggerHaptic(settings.wahalaMode ? 80 : 50);
+        spawnParticle(it.x, it.y, '#e63946', 12, 1.4);
         spawnFloater(it.x, it.y - 10, 'BURN! 🌶️', '#ff4d5a');
+      } else if (it.type === 'golden_pot') {
+        score += 5;
+        streak += 2;
+        best = Math.max(best, streak);
+        characterMood = 'celebrating';
+        moodTimer = 0.6;
+        playSound('golden_pot');
+        triggerHaptic([30, 20, 40]);
+        spawnParticle(it.x, it.y, '#ffc21a', 18, 1.6);
+        spawnFloater(it.x, it.y - 10, '+5 GOLDEN POT! 🍲✨', '#ffd166');
       } else if (it.type === 'drink') {
         score += 3;
         streak++;
@@ -946,7 +1116,7 @@ function frameLoop(t) {
     }
 
     if (it.y > H + 25) {
-      if (it.type === 'food') streak = 0;
+      if (it.type === 'food' || it.type === 'golden_pot') streak = 0;
       updateHUD();
       return false;
     }
@@ -987,7 +1157,7 @@ function draw() {
 
   // Screen shake effect
   if (shakeTimer > 0 && settings.particles) {
-    const intensity = shakeTimer * 12;
+    const intensity = shakeTimer * (settings.wahalaMode ? 18 : 12);
     const ox = (Math.random() - 0.5) * intensity;
     const oy = (Math.random() - 0.5) * intensity;
     ctx.translate(ox, oy);
@@ -995,17 +1165,42 @@ function draw() {
 
   ctx.clearRect(0, 0, W, H);
 
-  // Road & background details
+  // Wahala Mode ambient heat glow
+  if (settings.wahalaMode) {
+    const grad = ctx.createRadialGradient(W / 2, H / 2, 80, W / 2, H / 2, W);
+    grad.addColorStop(0, 'rgba(230, 57, 70, 0.0)');
+    grad.addColorStop(1, 'rgba(230, 57, 70, 0.18)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, W, H);
+  }
+
+  // Road & background
   ctx.fillStyle = '#080f21';
   ctx.fillRect(0, H - 30, W, 30);
-  ctx.fillStyle = 'rgba(255,194,26,0.3)';
+  ctx.fillStyle = settings.wahalaMode ? 'rgba(230,57,70,0.45)' : 'rgba(255,194,26,0.3)';
   for (let x = 0; x < W; x += 40) ctx.fillRect(x, H - 16, 22, 4);
 
-  // Falling Items
+  // Wind Indicator
+  if (Math.abs(windCurrent) > 15) {
+    ctx.fillStyle = 'rgba(255, 247, 224, 0.35)';
+    ctx.font = '12px "Trebuchet MS", sans-serif';
+    ctx.textAlign = windCurrent > 0 ? 'right' : 'left';
+    const arrow = windCurrent > 0 ? '💨 Wind ▶▶' : '◀◀ Wind 💨';
+    ctx.fillText(arrow, windCurrent > 0 ? W - 18 : 18, 54);
+  }
+
+  // Falling Items (with golden sparkles if golden pot)
   ctx.font = '34px "Segoe UI Emoji", "Apple Color Emoji", serif';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   for (const it of items) {
+    if (it.type === 'golden_pot') {
+      // Golden halo behind pot
+      ctx.fillStyle = 'rgba(255, 194, 26, 0.45)';
+      ctx.beginPath();
+      ctx.arc(it.x, it.y, 22, 0, Math.PI * 2);
+      ctx.fill();
+    }
     ctx.fillText(it.emoji, it.x, it.y);
   }
 
@@ -1031,10 +1226,10 @@ function draw() {
 
   // Party mode aura when high streak
   if (streak >= 5) {
-    ctx.fillStyle = '#ffc21a';
+    ctx.fillStyle = settings.wahalaMode ? '#ff4d5a' : '#ffc21a';
     ctx.font = 'bold 14px "Trebuchet MS", sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText(`🔥 PARTY FEVER (x${streak})`, px, H - 130);
+    ctx.fillText(settings.wahalaMode ? `💀 WAHALA SURVIVOR (x${streak})` : `🔥 PARTY FEVER (x${streak})`, px, H - 130);
   }
 
   ctx.restore();
@@ -1046,8 +1241,14 @@ async function gameOver() {
   playSound('over');
   triggerHaptic([60, 50, 90]);
 
+  // Pick a random funny roast
+  lastRoast = ROASTS[Math.floor(Math.random() * ROASTS.length)];
+  $('roast-msg').textContent = `"${lastRoast}"`;
+
+  const modeName = settings.wahalaMode ? '🔥 Wahala Mode' : 'Standard Party';
+  $('over-emoji').textContent = settings.wahalaMode ? '💀' : '🔥';
   $('final').textContent = `${score} Caught!`;
-  $('detail').textContent = `Best streak this run: ${best}`;
+  $('detail').textContent = `${modeName} • Best streak this run: ${best}`;
   $('msg').textContent = user ? 'Saving run to start.ng...' : 'Sign in to save your score on start.ng';
   $('over').hidden = false;
 
@@ -1100,6 +1301,47 @@ $('quit-btn').onclick = () => {
   reset();
   draw();
   loadBoard($('board'));
+};
+
+// Mode selection chips on menu
+$('chip-normal').onclick = () => {
+  settings.wahalaMode = false;
+  saveSettings();
+  playSound('click');
+};
+$('chip-wahala').onclick = () => {
+  settings.wahalaMode = true;
+  saveSettings();
+  playSound('click');
+};
+
+// Share Your Shame Button
+$('share-shame-btn').onclick = async () => {
+  playSound('click');
+  const modeText = settings.wahalaMode ? 'Wahala Mode 🌶️' : 'Standard Party 🍛';
+  const playerName = user?.name || $('pname').textContent || 'Player';
+  const shareText = `🍛 Jollof Catch on start.ng:\n` +
+    `I caught ${score} plates (Streak: ${best}) in ${modeText}!\n` +
+    `Party Gossip: "${lastRoast}"\n` +
+    `Can you beat my plate-catching record? Play now: https://jollof-catch.start.ng`;
+
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(shareText);
+      showToast('Shame card copied to clipboard! 📋');
+    } else {
+      // Fallback
+      const input = document.createElement('textarea');
+      input.value = shareText;
+      document.body.appendChild(input);
+      input.select();
+      document.execCommand('copy');
+      document.body.removeChild(input);
+      showToast('Shame card copied! 📋');
+    }
+  } catch (err) {
+    showToast('Failed to copy card.');
+  }
 };
 
 // Instructions Modal
@@ -1158,6 +1400,14 @@ $('set-particles').onchange = (e) => {
   settings.particles = e.target.checked;
   saveSettings();
 };
+
+document.querySelectorAll('#set-mode-group button').forEach(btn => {
+  btn.onclick = () => {
+    settings.wahalaMode = btn.dataset.val === 'wahala';
+    saveSettings();
+    playSound('click');
+  };
+});
 
 document.querySelectorAll('#set-control-group button').forEach(btn => {
   btn.onclick = () => {
