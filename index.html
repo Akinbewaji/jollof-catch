@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Jollof Catch</title>
+<style>
+  :root { --ink:#16213a; --yellow:#ffc21a; --red:#d9381e; --leaf:#1f8a5b; --paper:#fff6dc; }
+  * { box-sizing: border-box; }
+  html, body { margin:0; height:100%; background:var(--ink); color:var(--paper);
+    font-family: "Trebuchet MS", "Segoe UI", system-ui, sans-serif; overflow:hidden; touch-action:none; }
+  #wrap { position:relative; height:100%; display:flex; align-items:center; justify-content:center; }
+  #stage { position:relative; height:min(100vh, 133.33vw); aspect-ratio:3/4; max-width:100vw; }
+  canvas { width:100%; height:100%; display:block; background:linear-gradient(#25345c,#16213a 70%); border-radius:12px; }
+  .overlay { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:12px; padding:20px; text-align:center; background:rgba(22,33,58,.88); border-radius:12px; }
+  .overlay[hidden] { display:none; }
+  h1 { margin:0; font-size:clamp(34px,9vw,56px); color:var(--yellow); letter-spacing:-1px; line-height:1; }
+  p { margin:0; max-width:34ch; line-height:1.4; }
+  button, a.btn { border:0; border-radius:999px; padding:12px 26px; font:inherit; font-weight:700; cursor:pointer;
+    background:var(--yellow); color:var(--ink); text-decoration:none; }
+  button.alt, a.btn.alt { background:transparent; color:var(--paper); border:2px solid var(--paper); padding:8px 18px; }
+  button:focus-visible, a.btn:focus-visible { outline:3px solid #fff; outline-offset:2px; }
+  .card { display:flex; align-items:center; gap:10px; padding:6px 14px 6px 6px; border-radius:999px; background:#0e1730; }
+  .card img { width:44px; height:44px; border-radius:50%; background:var(--yellow); }
+  .card b { display:block; text-align:left; }
+  .card span { font-size:12px; opacity:.7; display:block; text-align:left; }
+  ol { margin:0; padding:0; list-style:none; width:min(300px,100%); text-align:left; font-size:14px; }
+  ol li { display:flex; justify-content:space-between; gap:8px; padding:3px 0; border-bottom:1px solid rgba(255,246,220,.15); }
+  ol li.me { color:var(--yellow); font-weight:700; }
+  #msg { min-height:1.4em; color:var(--yellow); }
+</style>
+</head>
+<body>
+<div id="wrap"><div id="stage">
+  <canvas id="c" width="480" height="640" aria-label="Jollof Catch game"></canvas>
+  <div class="overlay" id="menu">
+    <h1>Jollof Catch</h1>
+    <p>Slide left and right to catch plates and plantain. Dodge the scotch bonnets. Three burns and you're out.</p>
+    <div class="card" id="card"><img id="face" alt=""><div><b id="pname">Guest</b><span id="pacct">Not signed in</span></div></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center">
+      <button id="play">Play</button>
+      <a class="btn alt" id="signin" href="#" hidden>Sign in to save scores</a>
+    </div>
+    <ol id="board" aria-label="Leaderboard"></ol>
+  </div>
+  <div class="overlay" id="over" hidden>
+    <h1 id="final">0</h1>
+    <p id="detail"></p>
+    <p id="msg"></p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center">
+      <button id="again">Play again</button>
+      <a class="btn alt" id="signin2" href="#" hidden>Sign in to save scores</a>
+    </div>
+    <ol id="board2" aria-label="Leaderboard"></ol>
+  </div>
+</div></div>
+
+<script type="module">
+// ---------- start.ng connect ----------
+const START_NG = 'https://start.ng';
+let frame;
+function connectFrame() {
+  frame ??= new Promise((resolve, reject) => {
+    const el = document.createElement('iframe');
+    el.src = `${START_NG}/connect`; el.hidden = true;
+    el.onload = () => resolve(el); el.onerror = reject;
+    document.body.append(el);
+  });
+  return frame;
+}
+async function askStartNg(message, replyType, timeoutMs = 5000) {
+  try {
+    const el = await connectFrame();
+    return await new Promise((resolve) => {
+      const requestId = Math.random().toString(36).slice(2);
+      const done = (r) => { clearTimeout(timer); removeEventListener('message', onMessage); resolve(r); };
+      const timer = setTimeout(() => done(null), timeoutMs);
+      function onMessage(e) {
+        if (e.origin !== START_NG || e.source !== el.contentWindow) return;
+        if (e.data?.type === replyType && e.data.requestId === requestId) done(e.data);
+      }
+      addEventListener('message', onMessage);
+      el.contentWindow.postMessage({ ...message, requestId }, START_NG);
+    });
+  } catch { return null; }
+}
+
+// ---------- player ----------
+const $ = (id) => document.getElementById(id);
+const DEFAULT_STYLE = { body:'male', primaryColor:'#d9381e', secondaryColor:'#2b2f4a', skinColor:'#8d5524', hairColor:'#17120f', hair:'short', hat:'none', accessory:'none' };
+let user = null, style = DEFAULT_STYLE;
+const signInUrl = `https://start.ng/?return_to=${encodeURIComponent(location.origin + location.pathname)}`;
+$('signin').href = signInUrl; $('signin2').href = signInUrl;
+
+async function loadPlayer() {
+  const reply = await askStartNg({ type: 'startng:whoami' }, 'startng:user');
+  user = reply?.user ?? null;
+  const p = reply?.user ?? reply?.guest;
+  style = { ...DEFAULT_STYLE, ...(p?.style || {}) };
+  $('pname').textContent = p?.name || 'Guest';
+  $('pacct').textContent = user?.account ? `@${user.account}` : 'Not signed in';
+  if (p?.face) $('face').src = p.face;
+  $('signin').hidden = !!user; $('signin2').hidden = !!user;
+}
+async function loadBoard(el) {
+  const r = await askStartNg({ type: 'startng:leaderboard', limit: 8 }, 'startng:leaderboardData');
+  el.replaceChildren();
+  if (!r?.ok || !r.entries?.length) { const li = document.createElement('li'); li.textContent = 'No scores yet. Be the first.'; el.append(li); return; }
+  for (const e of r.entries) {
+    const li = document.createElement('li');
+    if (user && e.player_id === user.id) li.className = 'me';
+    const a = document.createElement('span'); a.textContent = `#${e.rank} ${e.name}`;
+    const b = document.createElement('span'); b.textContent = `${e.stats?.score ?? e.score} (x${e.stats?.streak ?? 0})`;
+    li.append(a, b); el.append(li);
+  }
+}
+addEventListener('focus', loadPlayer);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) loadPlayer(); });
+
+// ---------- character drawing ----------
+function drawCharacter(ctx, x, y, s, st) {
+  // x,y = feet centre; s = scale (1 = ~90px tall)
+  const u = s;
+  ctx.save(); ctx.translate(x, y); ctx.scale(u, u);
+  const skirt = st.body === 'female';
+  // legs / skirt
+  ctx.fillStyle = st.secondaryColor;
+  if (skirt) { ctx.beginPath(); ctx.moveTo(-16,-38); ctx.lineTo(16,-38); ctx.lineTo(22,-14); ctx.lineTo(-22,-14); ctx.fill();
+    ctx.fillStyle = st.skinColor; ctx.fillRect(-12,-14,7,14); ctx.fillRect(5,-14,7,14); }
+  else { ctx.fillRect(-13,-38,11,38); ctx.fillRect(2,-38,11,38); }
+  // backpack
+  if (st.accessory === 'backpack') { ctx.fillStyle = '#6b4f2a'; ctx.fillRect(-24,-70,10,32); }
+  // torso
+  ctx.fillStyle = st.primaryColor; ctx.fillRect(-17,-72,34,36);
+  // arms up (catching)
+  ctx.fillStyle = st.skinColor; ctx.fillRect(-26,-78,9,34); ctx.fillRect(17,-78,9,34);
+  if (st.accessory === 'scarf') { ctx.fillStyle = '#f2b705'; ctx.fillRect(-14,-76,28,7); }
+  // head
+  ctx.fillStyle = st.skinColor; ctx.beginPath(); ctx.arc(0,-88,15,0,7); ctx.fill();
+  // hair
+  ctx.fillStyle = st.hairColor;
+  const hair = st.hair;
+  if (hair !== 'bald') {
+    ctx.beginPath(); ctx.arc(0,-92,15,Math.PI,0); ctx.fill();
+    if (hair === 'afro') { ctx.beginPath(); ctx.arc(0,-96,21,0,7); ctx.fill(); ctx.fillStyle = st.skinColor; ctx.beginPath(); ctx.arc(0,-86,13,0,7); ctx.fill(); }
+    if (hair === 'bun') { ctx.beginPath(); ctx.arc(0,-110,8,0,7); ctx.fill(); }
+    if (hair === 'ponytail') { ctx.fillRect(12,-98,7,24); }
+    if (hair === 'braids' || hair === 'dreads') { for (const dx of [-15,-9,9,15]) ctx.fillRect(dx-2,-96,4,hair==='dreads'?30:24); }
+  }
+  // face
+  ctx.fillStyle = '#111'; ctx.fillRect(-7,-90,3,3); ctx.fillRect(4,-90,3,3);
+  ctx.fillRect(-4,-82,8,2);
+  if (st.accessory === 'glasses') { ctx.strokeStyle = '#111'; ctx.lineWidth = 2; ctx.strokeRect(-10,-93,9,8); ctx.strokeRect(1,-93,9,8); }
+  if (st.accessory === 'beard') { ctx.fillStyle = st.hairColor; ctx.fillRect(-10,-81,20,8); }
+  if (st.accessory === 'earrings') { ctx.fillStyle = '#ffc21a'; ctx.fillRect(-17,-84,3,5); ctx.fillRect(14,-84,3,5); }
+  // hat
+  if (st.hat === 'cap') { ctx.fillStyle = st.primaryColor; ctx.beginPath(); ctx.arc(0,-95,15,Math.PI,0); ctx.fill(); ctx.fillRect(0,-96,22,4); }
+  if (st.hat === 'beanie') { ctx.fillStyle = st.secondaryColor; ctx.beginPath(); ctx.arc(0,-95,16,Math.PI,0); ctx.fill(); }
+  if (st.hat === 'tophat') { ctx.fillStyle = '#111'; ctx.fillRect(-18,-103,36,5); ctx.fillRect(-11,-123,22,22); }
+  if (st.hat === 'crown') { ctx.fillStyle = '#ffc21a'; ctx.beginPath(); ctx.moveTo(-13,-102); ctx.lineTo(-13,-116); ctx.lineTo(-6,-109); ctx.lineTo(0,-118); ctx.lineTo(6,-109); ctx.lineTo(13,-116); ctx.lineTo(13,-102); ctx.fill(); }
+  ctx.restore();
+}
+
+// ---------- game ----------
+const cv = $('c'), ctx = cv.getContext('2d');
+const W = cv.width, H = cv.height;
+let px = W/2, targetX = W/2, items, score, streak, best, lives, running, spawnT, speed, last;
+const GOOD = ['🍛','🍌','🍗'];
+function reset() { items = []; score = 0; streak = 0; best = 0; lives = 3; spawnT = 0; speed = 150; px = targetX = W/2; }
+
+function setTarget(clientX) { const r = cv.getBoundingClientRect(); targetX = Math.max(30, Math.min(W-30, (clientX - r.left) / r.width * W)); }
+cv.addEventListener('pointermove', (e) => { if (running) setTarget(e.clientX); });
+cv.addEventListener('pointerdown', (e) => { if (running) setTarget(e.clientX); });
+const keys = {};
+addEventListener('keydown', (e) => { keys[e.key.toLowerCase()] = true; });
+addEventListener('keyup', (e) => { keys[e.key.toLowerCase()] = false; });
+
+function frameLoop(t) {
+  if (!running) return;
+  const dt = Math.min(0.05, (t - last) / 1000); last = t;
+  if (keys['arrowleft'] || keys['a']) targetX -= 420*dt;
+  if (keys['arrowright'] || keys['d']) targetX += 420*dt;
+  targetX = Math.max(30, Math.min(W-30, targetX));
+  px += (targetX - px) * Math.min(1, dt*14);
+  speed = 150 + score*3;
+  spawnT -= dt;
+  if (spawnT <= 0) {
+    const bad = Math.random() < 0.28;
+    items.push({ x: 30 + Math.random()*(W-60), y: -20, bad, e: bad ? '🌶️' : GOOD[Math.floor(Math.random()*GOOD.length)], v: speed*(0.85+Math.random()*0.4) });
+    spawnT = Math.max(0.35, 0.9 - score*0.012);
+  }
+  for (const it of items) it.y += it.v*dt;
+  const feet = H-30, catchY = feet-95;
+  items = items.filter((it) => {
+    if (it.y > catchY-10 && it.y < catchY+40 && Math.abs(it.x-px) < 38) {
+      if (it.bad) { lives--; streak = 0; } else { score++; streak++; best = Math.max(best, streak); }
+      return false;
+    }
+    if (it.y > H+20) { if (!it.bad) streak = 0; return false; }
+    return true;
+  });
+  draw();
+  if (lives <= 0) return gameOver();
+  requestAnimationFrame(frameLoop);
+}
+function draw() {
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle = '#0e1730'; ctx.fillRect(0,H-30,W,30);
+  ctx.fillStyle = '#ffc21a'; for (let x=0;x<W;x+=40) ctx.fillRect(x,H-16,22,4);
+  ctx.font = '34px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  for (const it of items) ctx.fillText(it.e, it.x, it.y);
+  drawCharacter(ctx, px, H-30, 1, style);
+  ctx.fillStyle = '#fff6dc'; ctx.font = 'bold 22px "Trebuchet MS", sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+  ctx.fillText(`Plates ${score}`, 16, 34);
+  ctx.textAlign = 'right'; ctx.fillText(`Streak ${streak}`, W-16, 34);
+  ctx.textAlign = 'center'; ctx.fillText('🔥'.repeat(Math.max(0, lives)), W/2, 34);
+}
+async function gameOver() {
+  running = false;
+  $('final').textContent = `${score} caught`;
+  $('detail').textContent = `Best streak: ${best}`;
+  $('msg').textContent = user ? 'Saving your score...' : 'Sign in to put this on the leaderboard.';
+  $('over').hidden = false;
+  if (user) {
+    const r = await askStartNg({ type: 'startng:score', stats: { score, streak: best } }, 'startng:scoreSaved');
+    $('msg').textContent = r?.ok ? (r.result.improved ? `New personal best. You're #${r.result.rank}.` : `Not your best. You're #${r.result.rank}.`) : (r?.error || 'Could not save your score.');
+  }
+  loadBoard($('board2'));
+}
+function start() { reset(); $('menu').hidden = true; $('over').hidden = true; running = true; last = performance.now(); requestAnimationFrame(frameLoop); }
+$('play').onclick = start; $('again').onclick = start;
+
+reset(); draw();
+await loadPlayer();
+loadBoard($('board'));
+</script>
+</body>
+</html>
